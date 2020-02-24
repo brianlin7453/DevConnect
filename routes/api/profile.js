@@ -1,12 +1,13 @@
 const express = require("express");
-const request = require('request');
-const config = require('config');
+const request = require("request");
+const config = require("config");
 const router = express.Router();
 const auth = require("../../middleware/auth");
 const { check, validationResult } = require("express-validator");
 
 const Profile = require("../../models/Profile");
 const User = require("../../models/User");
+const Post = require("../../models/Post");
 //@route  GET api/profile/me
 //@desc   Get current user's profile
 //@access Private
@@ -20,7 +21,7 @@ router.get("/me", auth, async (req, res) => {
     }
     res.json(profile);
   } catch (error) {
-    console.log(error.message);
+    console.error(error.message);
     res.status(500).send("Server Error");
   }
 });
@@ -73,7 +74,10 @@ router.post(
     if (status) profileFields.status = status;
     if (githubusername) profileFields.githubusername = githubusername;
     if (skills) {
-      profileFields.skills = skills.toString().split(",").map(skill => skill.trim());
+      profileFields.skills = skills
+        .toString()
+        .split(",")
+        .map(skill => skill.trim());
     }
 
     //Build social object
@@ -101,8 +105,8 @@ router.post(
       profile = new Profile(profileFields);
       await profile.save();
       res.json(profile);
-    } catch (error) {
-      console.error(error.message);
+    } catch (err) {
+      console.error(err.message);
       res.status(500).send("Server Error");
     }
   }
@@ -143,10 +147,12 @@ router.get("/user/:user_id", async (req, res) => {
 });
 
 //@route  DELETE api/profile/
-//@desc   Get profile, user & posts
+//@desc   Delete profile, user & posts
 //@access Private
 router.delete("/", auth, async (req, res) => {
   try {
+    //Remove user posts
+    await Post.deleteMany({ user: req.user.id });
     //Remove profile
     await Profile.findOneAndRemove({ user: req.user.id });
     //Remove user
@@ -330,29 +336,31 @@ router.delete("/education/:edu_id", auth, async (req, res) => {
 //@route  GET api/profile/github/:username
 //@desc   Get user repos from Github
 //@access Public
-router.get('/github/:username', (req, res) => {
+router.get("/github/:username", (req, res) => {
   try {
     const options = {
-      url: `https://api.github.com/users/${req.params.username}/repos?per_page=5&sort=created:asc`,
-      method: 'GET',
+      url: encodeURI(
+        `https://api.github.com/users/${req.params.username}/repos?per_page=5&sort=created:asc`
+      ),
+      method: "GET",
       headers: {
-        'user-agent': 'node.js',
-        Authorization: `token ${config.get('OAUTH-TOKEN')}`
+        "user-agent": "node.js",
+        Authorization: `token ${config.get("OAUTH-TOKEN")}`
       }
     };
-    
+
     request(options, (error, response, body) => {
-      if(error) console.error(error.message);
-      if(response.statusCode !== 200){
-        return res.status(400).json({ msg: 'No Github profile found' });
+      console.log(response.statusCode);
+      if (error) console.error(error.message);
+      if (response.statusCode !== 200) {
+        return res.status(400).json({ msg: "No Github profile found" });
       }
       res.json(JSON.parse(body));
-    })
+    });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
-})
-
+});
 
 module.exports = router;
