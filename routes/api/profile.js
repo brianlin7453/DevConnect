@@ -8,6 +8,7 @@ const { check, validationResult } = require("express-validator");
 const Profile = require("../../models/Profile");
 const User = require("../../models/User");
 const Post = require("../../models/Post");
+
 //@route  GET api/profile/me
 //@desc   Get current user's profile
 //@access Private
@@ -350,7 +351,6 @@ router.get("/github/:username", (req, res) => {
     };
 
     request(options, (error, response, body) => {
-      console.log(response.statusCode);
       if (error) console.error(error.message);
       if (response.statusCode !== 200) {
         return res.status(400).json({ msg: "No Github profile found" });
