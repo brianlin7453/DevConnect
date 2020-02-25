@@ -1,0 +1,5 @@
+{
+    "mongoURI": "mongodb+srv://Brian:brian@devconnect-n1lfo.mongodb.net/test?retryWrites=true&w=majority",
+    "jwtSecret": "mysecrettoken",
+    "OAUTH-TOKEN": "820d084846f8e774b6fa647cb089f652201075ba"
+}
