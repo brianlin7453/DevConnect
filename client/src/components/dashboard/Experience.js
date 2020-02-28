@@ -1,8 +1,9 @@
-import React, { Fragment } from "react";
-import PropTypes from "prop-types";
-import Moment from "react-moment";
-import { connect } from "react-redux";
-import { deleteExperience } from "../../actions/profile";
+import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
+import Moment from 'react-moment';
+import moment from 'moment';
+import { connect } from 'react-redux';
+import { deleteExperience } from '../../actions/profile';
 
 const Experience = ({ experience, deleteExperience }) => {
   const experiences = experience.map(exp => (
@@ -10,11 +11,11 @@ const Experience = ({ experience, deleteExperience }) => {
       <td>{exp.company}</td>
       <td className="hide-sm">{exp.title}</td>
       <td>
-        <Moment format="MM/DD/YYYY">{exp.from}</Moment> -{" "}
+        <Moment format="YYYY/MM/DD">{moment.utc(exp.from)}</Moment> -{' '}
         {exp.to === null ? (
-          " Now"
+          ' Now'
         ) : (
-          <Moment format="MM/DD/YYYY">{exp.to}</Moment>
+          <Moment format="YYYY/MM/DD">{moment.utc(exp.to)}</Moment>
         )}
       </td>
       <td>
@@ -27,10 +28,11 @@ const Experience = ({ experience, deleteExperience }) => {
       </td>
     </tr>
   ));
+
   return (
     <Fragment>
       <h2 className="my-2">Experience Credentials</h2>
-      <table>
+      <table className="table">
         <thead>
           <tr>
             <th>Company</th>
@@ -50,4 +52,7 @@ Experience.propTypes = {
   deleteExperience: PropTypes.func.isRequired
 };
 
-export default connect(null, { deleteExperience })(Experience);
+export default connect(
+  null,
+  { deleteExperience }
+)(Experience);
